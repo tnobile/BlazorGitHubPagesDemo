@@ -1,0 +1,77 @@
+﻿@page "/fetchweather"
+@inject HttpClient Http
+
+<h1>Weather forecastish</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+    <input @bind="myKey"/>
+    <button class='btn-primary' @onclick="GetReal">Get real</button>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if(forecasts!=null)
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Name</td>
+                    <td>@forecast.Main.Temp</td>
+                    <td>@forecast.Coord.Lon</td>
+                    <td>@forecast.Coord.Lat</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button class='btn-primary' @onclick="GetReal">Get real</button>
+}
+
+@code {
+    private List<WeatherForecast> forecasts = null;
+    private string myKey;
+    private async Task GetReal()
+    {
+        if(string.IsNullOrEmpty(myKey)) {
+            Console.WriteLine("empty key");
+            return ;
+        }
+        var unit = "metric";
+        var uriEncodedCity = "London";
+        var url = $"https://api.openweathermap.org/data/2.5/weather?q={uriEncodedCity}&units={unit}&appid={myKey}";
+        var content = await Http.GetStringAsync(url);
+        Console.WriteLine(content);
+        var obj = JsonConvert.DeserializeObject<WeatherForecast>(content);
+        Console.WriteLine(obj.Coord.Lon);
+        forecasts = new List<WeatherForecast>{ obj};
+    }
+
+    public class WeatherForecast
+    {
+        public string Name {get;set;}
+        public string Timezone{get;set;}
+        public string Cod{get;set;}
+        public string Id{get;set;}
+        public Coord Coord{get;set;}
+        public Main Main{get;set;}
+        //public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
+    public class Coord{
+      public string Lon{get;set;}
+      public string Lat{get;set;}
+    }
+
+    public class Main{
+        public string Temp{get;set;}
+    }
+}
