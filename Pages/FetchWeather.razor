@@ -16,9 +16,9 @@ else
         <thead>
             <tr>
                 <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
+                <th>Temp</th>
+                <th>Longitudo</th>
+                <th>Latitudo</th>
             </tr>
         </thead>
         <tbody>
@@ -34,20 +34,41 @@ else
             }
         </tbody>
     </table>
+    <input @bind="city"/>
+    <div>
+    <input type='radio' name='metric' id='metric' value='metric' 
+    checked=@(unit.Equals("metric",StringComparison.OrdinalIgnoreCase))
+    @onchange="UnitsSelected"/>
+
+    <lable for="metric">metric</lable>
+    </div>
+    <div>
+    <input type='radio' name='imperial' id='imperial' value='imperial'
+    checked=@(unit.Equals("imperial",StringComparison.OrdinalIgnoreCase))
+     @onchange="UnitsSelected"/>
+    <lable for="imperial">imperial</lable>
+    </div>
     <button class='btn-primary' @onclick="GetReal">Get real</button>
 }
 
 @code {
     private List<WeatherForecast> forecasts = null;
     private string myKey;
+    private string city="London";
+    private string unit = "metric";
+
+    private void UnitsSelected(ChangeEventArgs args) {
+      unit =  args.Value.ToString();
+      Console.WriteLine($"unit is {unit}");
+    } 
+    
     private async Task GetReal()
     {
         if(string.IsNullOrEmpty(myKey)) {
             Console.WriteLine("empty key");
             return ;
         }
-        var unit = "metric";
-        var uriEncodedCity = "London";
+        var uriEncodedCity = city;
         var url = $"https://api.openweathermap.org/data/2.5/weather?q={uriEncodedCity}&units={unit}&appid={myKey}";
         var content = await Http.GetStringAsync(url);
         Console.WriteLine(content);
